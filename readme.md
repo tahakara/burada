@@ -3,7 +3,7 @@
 
 This project is an attendance system composed of hardware and software components that allows teachers and students to perform attendance using RFID cards.
 
-<img title="a title" alt="Alt text" src="./misc/images/master.jpg">
+<img title="a title" alt="Alt text" src="./misc/images/master_light.jpg">
 
 ## 🧩 Project Components
 

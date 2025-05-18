@@ -2,7 +2,7 @@
 
 Bu proje, öğretmenlerin ve öğrencilerin RFID kartları kullanarak yoklama işlemlerini gerçekleştirmesini sağlayan, donanım ve yazılım bileşenlerinden oluşan bir yoklama sistemidir.
 
-<img title="a title" alt="Alt text" src="./misc/images/master.jpg">
+<img title="a title" alt="Alt text" src="./misc/images/master_light.jpg">
 
 
 ## 🧩 Proje Bileşenleri
