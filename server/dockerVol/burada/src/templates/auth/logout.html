@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <script>
+        // Remove authorization header and redirect to login page
+        function logout() {
+            // Clear authorization header or token from storage
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('auth_token');
+
+            // Redirect to login page
+            window.location.href = '{{ auth_path }}?redirectedFrom={{ logout_path }}';
+        }
+
+        // Call logout function on page load
+        window.onload = logout;
+    </script>
+</head>

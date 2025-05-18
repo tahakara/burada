@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Would You Like to Some Tead</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 10%;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            cursor: default;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        img {
+            height: 60vh;
+            width: auto;
+        }
+        img > a > span{
+            display: none;
+        }
+    </style>
+    {% include 'partials/scripts.html' %}
+</head>
+<body>
+    <div class="container">
+        <a href="/">
+            <img src="{ url_for('static', filename='images/i_am_a_teapor.png') }" alt="I am a teapot image" srcset=""><br>
+            <span>Go back to Home</span>
+        </a>
+    </div>
+</body>
+</html>

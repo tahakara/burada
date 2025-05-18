@@ -1,0 +1,101 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"  # HTTP (80)
+      - "443:443"  # HTTPS (443)
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/root/dockerVol/traefik/data/dynamic:/dynamic"  # Dynamic configuration files
+      - "/root/dockerVol/certs:/certs"  # Certificates directory
+    command:
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.file.directory=/dynamic"
+      - "--providers.file.watch=true"
+      - "--providers.docker=false"
+      - "--api.dashboard=true"
+    networks:
+      - traefik-net
+
+    mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "127.0.0.1:3306:3306"  # Only 127.0.0.1 can access MySQL
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=burada
+    volumes:
+      - /root/dockerVol/mysql/data:/var/lib/mysql  # Volume for MySQL data
+    networks:
+      - traefik-net  # Only on this network
+    # Uncomment the following lines if you want to use a custom MySQL configuration
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "127.0.0.1:6379:6379"  # Only
+    environment:
+      - REDIS_PASSWORD=1234
+    volumes:
+      - /root/dockerVol/redis/data:/data  # Volume for Redis data
+    networks:
+      - traefik-net  # Only on this network
+    # Uncomment the following lines if you want to use a custom Redis configuration
+
+  burada:
+    build: .
+    container_name: buarada
+    image: buarada:1.0.0
+#    ports:
+#      - "127.0.0.1:5001:5001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TK=TK
+      - APP_NAME=BURADA
+      - APP_VERSION=1.0.0
+      - APP_DESCRIPTION=Burada App
+      - APP_SECRET_KEY=You were the Chosen One! It was said that you would destroy the Sith, not join them! Bring balance to the Force, not leave it in darkness! You were my brother, Anakin! I loved you!
+      - APP_HOST=0.0.0.0
+      - APP_PORT=5261
+      - APP_DEBUG=0
+      - APP_LOG_LEVEL=debug
+      - DB_HOST=mysql  # Updated to match the MySQL service name
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=1234
+      - DB_NAME=buarada
+      - DB_CHARSET=utf8mb4
+      - DB_COLLATION=utf8mb4_general_ci
+      - DB_DRIVER=mysql
+      - REDIS_HOST=redis  # Updated to match the Redis service name
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_PASSWORD=1234
+      - REDIS_DB=0
+      - JWT_SECRET_KEY=SomeSecretKey
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_TIME=3600  # in seconds
+      - JWT_ISSUER=https://example.com
+      - JWT_REFRESH_TOKEN_EXPIRATION_TIME = 172800  # in seconds
+
+    volumes:
+      - /root/dockerVol/burada/src:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.buarada.entrypoints=websecure"
+      - "traefik.http.routers.buarada.rule=Host(`burada.example.com`)"
+      - "traefik.http.services.buarada.loadbalancer.server.port=5261"
+    networks:
+      - traefik-net
+    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt && python app.py"
+
+networks:
+  traefik-net:
+    external: true  # traefik-net is an external network

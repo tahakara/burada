@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    {% include 'partials/scripts.html' %}
+    {% include 'partials/header-icons.html' %}
+
+    {% include 'partials/misc/css/css-local-links.html' %}
+
+</head>
+<body>
+    Secure Location
+    <br>
+    <a href="{{ logout_path }}">Logout</a>
+    <br>
+    <!-- TODO: Feature -->
+    <a href="/profile">Profil</a>
+</body>
+</html>
