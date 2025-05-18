@@ -1,0 +1,411 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derslerim - Yoklama Sistemi</title>
+
+    {% include 'partials/scripts.html' %}
+    {% include 'partials/header-icons.html' %}
+    {% include 'partials/misc/css/css-local-links.html' %}
+
+    <!-- jQuery must come first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
+    
+    <!-- DataTables - after jQuery -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4>Öğretmen Paneli</h4>
+
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-home me-2"></i>Ana Sayfa
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/dashboard/lessons">
+                                <i class="fas fa-book me-2"></i>Derslerim
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile">
+                                <i class="fas fa-user me-2"></i>Profil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ logout_path }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Çıkış
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Derslerim</h1>
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>Derslerinizi bu sayfadan yönetebilir, yoklama alabilir ve raporları görüntüleyebilirsiniz.
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <table id="lessons-table" class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Ders Adı</th>
+                                    <th>Yoklama Durumu</th>
+                                    <th>Son Yoklama</th>
+                                    <th>Toplam Yoklama</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lessons-list">
+                                <!-- JavaScript ile doldurulacak -->
+                                <tr>
+                                    <td colspan="5" class="text-center">Dersler yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Yoklama Başlat Modal -->
+    <div class="modal fade" id="startAttendanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yoklama Başlat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Seçilen ders için yoklama başlatmak istediğinize emin misiniz?</p>
+                    <div class="mb-3">
+                        <label for="session-name" class="form-label">Oturum Adı (Opsiyonel)</label>
+                        <input type="text" class="form-control" id="session-name" placeholder="Örn: Hafta 5 Yoklama">
+                    </div>
+                    <input type="hidden" id="start-lesson-uuid">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" id="confirm-start-attendance">Yoklamayı Başlat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yoklama Kapat Modal -->
+    <div class="modal fade" id="stopAttendanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yoklama Kapat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Aktif yoklama oturumunu kapatmak istediğinize emin misiniz? Kapatıldıktan sonra öğrenciler artık yoklamaya katılamaz.</p>
+                    <input type="hidden" id="stop-attenation-id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-danger" id="confirm-stop-attendance">Yoklamayı Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dersleri yükle
+            loadTeacherLessons();
+            
+            // Event Listeners
+            document.getElementById('confirm-start-attendance').addEventListener('click', startAttendance);
+            document.getElementById('confirm-stop-attendance').addEventListener('click', stopAttendance);
+        });
+        
+        function loadTeacherLessons() {
+            // Yükleme göstergesi ekle
+            document.getElementById('lessons-list').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                        </div>
+                        <p class="mt-2">Dersler yükleniyor...</p>
+                    </td>
+                </tr>
+            `;
+            
+            // API'den öğretmenin derslerini al
+            fetch('/api/dashboard/lessons')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        displayLessons(data.data);
+                    } else {
+                        showError("Dersler yüklenirken bir hata oluştu: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    showError("Sunucu hatası: " + error);
+                });
+        }
+        
+        function displayLessons(lessons) {
+            const lessonsList = document.getElementById('lessons-list');
+            
+            // DataTable varsa önce yok et
+            if ($.fn.DataTable.isDataTable('#lessons-table')) {
+                $('#lessons-table').DataTable().destroy();
+            }
+            
+            if (lessons.length === 0) {
+                lessonsList.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Henüz atanmış ders bulunmuyor.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            lessons.forEach(lesson => {
+                const hasActiveSession = lesson.active_sessions > 0;
+                const statusBadgeClass = hasActiveSession ? 'bg-success' : 'bg-secondary';
+                const statusText = hasActiveSession ? 'Aktif' : 'İnaktif';
+                
+                html += `
+                    <tr>
+                        <td><strong>${lesson.lesson_name}</strong></td>
+                        <td>
+                            <span class="badge ${statusBadgeClass}">
+                                ${hasActiveSession ? 
+                                    '<i class="fas fa-circle-notch fa-spin me-1"></i>' : 
+                                    '<i class="fas fa-times-circle me-1"></i>'}
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>${lesson.last_session || '<span class="text-muted">Henüz yoklama alınmamış</span>'}</td>
+                        <td>
+                            <span class="badge bg-info">${lesson.total_sessions}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                ${hasActiveSession ? 
+                                    `<button class="btn btn-sm btn-danger" onclick="prepareStopAttendance('${lesson.active_session_id}')">
+                                        <i class="fas fa-stop me-1"></i>Yoklamayı Kapat
+                                    </button>` : 
+                                    `<button class="btn btn-sm btn-primary" onclick="prepareStartAttendance('${lesson.lesson_uuid}')">
+                                        <i class="fas fa-play me-1"></i>Yoklama Başlat
+                                    </button>`
+                                }
+                                <a href="/dashboard/lessons/detail/${lesson.lesson_uuid}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye me-1"></i>Detay
+                                </a>
+                                <a href="/dashboard/lessons/report/${lesson.lesson_uuid}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-chart-bar me-1"></i>Rapor
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            lessonsList.innerHTML = html;
+            
+            // DataTables'ı yeniden başlat
+            $('#lessons-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+                },
+                responsive: true,
+                order: [[0, 'asc']], // Ders adına göre sırala
+                columnDefs: [
+                    { responsivePriority: 1, targets: 0 }, // Ders adı
+                    { responsivePriority: 2, targets: 1 }, // Yoklama durumu 
+                    { responsivePriority: 3, targets: 4 }  // İşlemler
+                ]
+            });
+        }
+        
+        function prepareStartAttendance(lessonUuid) {
+            document.getElementById('start-lesson-uuid').value = lessonUuid;
+            document.getElementById('session-name').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('startAttendanceModal'));
+            modal.show();
+        }
+        
+        function prepareStopAttendance(attenationId) {
+            document.getElementById('stop-attenation-id').value = attenationId;
+            
+            const modal = new bootstrap.Modal(document.getElementById('stopAttendanceModal'));
+            modal.show();
+        }
+        
+        function startAttendance() {
+            const lessonUuid = document.getElementById('start-lesson-uuid').value;
+            const sessionName = document.getElementById('session-name').value;
+            
+            // Butonu devre dışı bırak
+            const startButton = document.getElementById('confirm-start-attendance');
+            const originalText = startButton.innerHTML;
+            startButton.disabled = true;
+            startButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>İşleniyor...';
+            
+            fetch('/api/dashboard/attendance/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    lesson_uuid: lessonUuid,
+                    session_name: sessionName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Başarılı yoklama başlatma
+                    document.getElementById('startAttendanceModal').querySelector('.btn-close').click();
+
+                    // Sayfayı yenile
+                    showSuccess(data.message || "Yoklama başarıyla başlatıldı.");
+                    setTimeout(() => loadTeacherLessons(), 1000);
+                } else {
+                    showError("Yoklama başlatılırken bir hata oluştu: " + data.message);
+                }
+            })
+            .catch(error => {
+                showError("Sunucu hatası: " + error);
+            })
+            .finally(() => {
+                // Butonu tekrar aktifleştir
+                startButton.disabled = false;
+                startButton.innerHTML = originalText;
+            });
+        }
+        
+        function stopAttendance() {
+            const attenationId = document.getElementById('stop-attenation-id').value;
+            
+            // Butonu devre dışı bırak
+            const stopButton = document.getElementById('confirm-stop-attendance');
+            const originalText = stopButton.innerHTML;
+            stopButton.disabled = true;
+            stopButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>İşleniyor...';
+            
+            fetch(`/api/dashboard/attendance/close/${attenationId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Başarılı yoklama kapatma
+                    document.getElementById('stopAttendanceModal').querySelector('.btn-close').click();
+
+                    // Sayfayı yenile
+                    showSuccess(data.message || "Yoklama başarıyla kapatıldı.");
+                    setTimeout(() => loadTeacherLessons(), 1000);
+                } else {
+                    showError("Yoklama kapatılırken bir hata oluştu: " + data.message);
+                }
+            })
+            .catch(error => {
+                showError("Sunucu hatası: " + error);
+            })
+            .finally(() => {
+                // Butonu tekrar aktifleştir
+                stopButton.disabled = false;
+                stopButton.innerHTML = originalText;
+            });
+        }
+        
+        // showError ve showSuccess fonksiyonlarını güncelleyelim
+        function showError(message) {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            document.querySelector('main').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Doğrudan DOM manipülasyonu ile kapat
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-danger');
+                if (alert) {
+                    alert.classList.remove('show');
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 150);
+                }
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            document.querySelector('main').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Doğrudan DOM manipülasyonu ile kapat
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                    alert.classList.remove('show');
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 150);
+                }
+            }, 5000);
+        }
+
+    </script>
+  
+</body>
+</html>

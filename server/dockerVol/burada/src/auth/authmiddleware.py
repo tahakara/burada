@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, Response, redirect, url_for, jsonify, make_response, render_template
+from flask import request, g, Response, redirect, url_for, jsonify, make_response, render_template
 
 from utils.JwtUtils import JwtUtils
 from utils.redis.RedisUtils import AuthRedisClientUtils
@@ -55,7 +55,9 @@ class AuthMiddleware:
                     response.headers['Location'] = f"{url_for('auth.login_get')}?redirectedFrom={request.path}"
                     response.headers['Authorization'] = ''
                     return response
-
+                
+                g.user = {}
+                g.user['user_uuid'] = payload['user_uuid']
             except Exception as e:
                 return jsonify({'error': f'Token validation error: {str(e)}'}), 403
 
@@ -99,7 +101,7 @@ class AuthMiddleware:
                 if payload:
                     # Check token in Redis to ensure it's not blacklisted
                     if not self.check_token_in_redis(jwt_token, payload):
-                        return redirect(url_for('auth.loguot', redirectedFrom=request.path))
+                        return redirect(url_for('auth.logout_get', redirectedFrom=request.path))
 
                         # return jsonify({'error': 'Token is blacklisted or invalid (Midleware)!'}), 403
                     
@@ -107,7 +109,7 @@ class AuthMiddleware:
                     # TODO: Redericet to dash or something
                     return redirect(url_for('dash.dash_index', redirectedFrom=request.path))
                 else:
-                    return redirect(url_for('auth.loguot', redirectedFrom=request.path))
+                    return redirect(url_for('auth.logout_get', redirectedFrom=request.path))
             except Exception as e:
                 print("asds", e)
                 return f(*args, **kwargs)

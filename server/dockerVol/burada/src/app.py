@@ -101,6 +101,8 @@ def create_app():
 
     from routes.auth import auth_bp
     from routes.dashboard import dash_bp
+    from routes.dashboard.attendance import attendance_bp
+    from routes.api.dashboard_lessons import lessons_api
     from routes.profile import profile_bp
     app.register_blueprint(middleware_bp)
 
@@ -113,6 +115,8 @@ def create_app():
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dash_bp, url_prefix='/dashboard')
+    app.register_blueprint(attendance_bp)
+    app.register_blueprint(lessons_api)
     app.register_blueprint(profile_bp, url_prefix='/profile')
 
 
@@ -130,9 +134,231 @@ from modal import db
 db.init_app(app)
 with app.app_context():
     inspector = inspect(db.engine)
+    # print(inspector)
+    # print(inspector.get_table_names())
+    
+    # Tüm modelleri import et
+    from modal import User
+    from modal.Lesson import Lesson
+    from modal.LessonTeacher import LessonTeacher
+    from modal.Student import Student
+    from modal.Attenation import Attenation
+    from modal.AttenationDetail import AttenationDetail
+    
+    db.drop_all()  # Sadece geliştirme aşamasında kullanın
     if not inspector.get_table_names():
         db.create_all()
+        # Önce tabloları temizle ve yeniden oluştur
+        
+        from datetime import datetime
+        from sqlalchemy.exc import IntegrityError
+        
+        # Default user oluştur
+        default_user = User(
+            id=1,
+            username='yagcimustafa',
+            email='yagci@tahakara.dev',
+            phone=None,
+            passwordHash='002097684c6b1b20817abbb72a341294731adfbcd00d61d0afa232b9147ae2f6',
+            passwordSalt='21f10f95514bea7a543ee41f9b01842e',
+            isActive=True,
+            isDeleted=False,
+            isEmailVerified=False,
+            isPhoneVerified=False,
+            lastLogin=datetime.strptime('2025-05-17 19:28:34', '%Y-%m-%d %H:%M:%S'),
+            uniqueID='36db24d9-3347-11f0-8318-1aebcda1d33f',
+            updatedAt=datetime.strptime('2025-05-17 19:28:34', '%Y-%m-%d %H:%M:%S'),
+            createdAt=datetime.strptime('2025-05-17 17:49:00', '%Y-%m-%d %H:%M:%S')
+        )
+        
+        # Diğer öğretmenler
+        other_teachers = [
+            User(
+                username='alikaya',
+                email='ali.kaya@tahakara.dev',
+                phone='5551234567',
+                passwordHash='002097684c6b1b20817abbb72a341294731adfbcd00d61d0afa232b9147ae2f6',
+                passwordSalt='21f10f95514bea7a543ee41f9b01842e',
+                isActive=True,
+                isDeleted=False,
+                isEmailVerified=True,
+                isPhoneVerified=True,
+                lastLogin=datetime.strptime('2025-05-18 10:15:22', '%Y-%m-%d %H:%M:%S'),
+                uniqueID='44db24d9-3347-11f0-8318-1aebcda1d34f',
+                updatedAt=datetime.strptime('2025-05-18 10:15:22', '%Y-%m-%d %H:%M:%S'),
+                createdAt=datetime.strptime('2025-05-17 18:30:00', '%Y-%m-%d %H:%M:%S')
+            ),
+            User(
+                username='aycademir',
+                email='ayca.demir@tahakara.dev',
+                phone='5551234568',
+                passwordHash='002097684c6b1b20817abbb72a341294731adfbcd00d61d0afa232b9147ae2f6',
+                passwordSalt='21f10f95514bea7a543ee41f9b01842e',
+                isActive=True,
+                isDeleted=False,
+                isEmailVerified=True,
+                isPhoneVerified=True,
+                lastLogin=datetime.strptime('2025-05-18 11:20:45', '%Y-%m-%d %H:%M:%S'),
+                uniqueID='45db24d9-3347-11f0-8318-1aebcda1d35f',
+                updatedAt=datetime.strptime('2025-05-18 11:20:45', '%Y-%m-%d %H:%M:%S'),
+                createdAt=datetime.strptime('2025-05-17 19:00:00', '%Y-%m-%d %H:%M:%S')
+            ),
+            User(
+                username='mehmetyilmaz',
+                email='mehmet.yilmaz@tahakara.dev',
+                phone='5551234569',
+                passwordHash='002097684c6b1b20817abbb72a341294731adfbcd00d61d0afa232b9147ae2f6',
+                passwordSalt='21f10f95514bea7a543ee41f9b01842e',
+                isActive=True,
+                isDeleted=False,
+                isEmailVerified=True,
+                isPhoneVerified=False,
+                lastLogin=datetime.strptime('2025-05-18 09:45:30', '%Y-%m-%d %H:%M:%S'),
+                uniqueID='46db24d9-3347-11f0-8318-1aebcda1d36f',
+                updatedAt=datetime.strptime('2025-05-18 09:45:30', '%Y-%m-%d %H:%M:%S'),
+                createdAt=datetime.strptime('2025-05-17 20:15:00', '%Y-%m-%d %H:%M:%S')
+            )
+        ]
+        
+        # Öğrenci verileri
+        students = [
+            Student(name='Ahmet', surname='Yılmaz', student_uuid='a1db24d9-3347-11f0-8318-1aebcda10001'),
+            Student(name='Ayşe', surname='Demir', student_uuid='a2db24d9-3347-11f0-8318-1aebcda10002'),
+            Student(name='Mehmet', surname='Kara', student_uuid='a3db24d9-3347-11f0-8318-1aebcda10003'),
+            Student(name='Zeynep', surname='Çelik', student_uuid='a4db24d9-3347-11f0-8318-1aebcda10004'),
+            Student(name='Ali', surname='Öztürk', student_uuid='a5db24d9-3347-11f0-8318-1aebcda10005'),
+            Student(name='Fatma', surname='Şahin', student_uuid='a6db24d9-3347-11f0-8318-1aebcda10006'),
+            Student(name='Can', surname='Aydın', student_uuid='a7db24d9-3347-11f0-8318-1aebcda10007'),
+            Student(name='Ece', surname='Yıldız', student_uuid='a8db24d9-3347-11f0-8318-1aebcda10008'),
+            Student(name='Burak', surname='Aksoy', student_uuid='a9db24d9-3347-11f0-8318-1aebcda10009'),
+            Student(name='Deniz', surname='Koç', student_uuid='a0db24d9-3347-11f0-8318-1aebcda10010')
+        ]
+        
+        # Veritabanına kaydet ve hata kontrolü yap
+        try:
+            # Kullanıcıları ekle
+            db.session.add(default_user)
+            for teacher in other_teachers:
+                db.session.add(teacher)
+            db.session.commit()
+            print(f"Kullanıcılar oluşturuldu: yagcimustafa, alikaya, aycademir, mehmetyilmaz")
+            
+            # Öğrencileri ekle
+            for student in students:
+                db.session.add(student)
+            db.session.commit()
+            print(f"10 öğrenci başarıyla eklendi")
+            
+            # Dersleri oluştur
+            lessons = [
+                Lesson(name="Yazılım Mühendisliği", lesson_uuid="48db24d9-3347-11f0-8318-1aebcda1d44f"),
+                Lesson(name="Veritabanı Sistemleri", lesson_uuid="49db24d9-3347-11f0-8318-1aebcda1d45f"),
+                Lesson(name="Yapay Zeka", lesson_uuid="50db24d9-3347-11f0-8318-1aebcda1d46f"),
+                Lesson(name="Web Programlama", lesson_uuid="51db24d9-3347-11f0-8318-1aebcda1d47f"),
+                Lesson(name="Mobil Uygulama Geliştirme", lesson_uuid="52db24d9-3347-11f0-8318-1aebcda1d48f"),
+                Lesson(name="Siber Güvenlik", lesson_uuid="53db24d9-3347-11f0-8318-1aebcda1d49f")
+            ]
+            
+            for lesson in lessons:
+                db.session.add(lesson)
+            db.session.commit()
+            print(f"6 ders başarıyla oluşturuldu")
+            
+            # Öğretmen-ders ilişkilerini oluştur
+            lesson_teachers = [
+                LessonTeacher(lesson_uuid="48db24d9-3347-11f0-8318-1aebcda1d44f", teacher_uuid="36db24d9-3347-11f0-8318-1aebcda1d33f"),  # Yazılım Müh - yagcimustafa
+                LessonTeacher(lesson_uuid="49db24d9-3347-11f0-8318-1aebcda1d45f", teacher_uuid="44db24d9-3347-11f0-8318-1aebcda1d34f"),  # Veritabanı - alikaya
+                LessonTeacher(lesson_uuid="50db24d9-3347-11f0-8318-1aebcda1d46f", teacher_uuid="45db24d9-3347-11f0-8318-1aebcda1d35f"),  # Yapay Zeka - aycademir
+                LessonTeacher(lesson_uuid="51db24d9-3347-11f0-8318-1aebcda1d47f", teacher_uuid="46db24d9-3347-11f0-8318-1aebcda1d36f"),  # Web Prog - mehmetyilmaz
+                LessonTeacher(lesson_uuid="52db24d9-3347-11f0-8318-1aebcda1d48f", teacher_uuid="36db24d9-3347-11f0-8318-1aebcda1d33f"),  # Mobil - yagcimustafa
+                LessonTeacher(lesson_uuid="53db24d9-3347-11f0-8318-1aebcda1d49f", teacher_uuid="44db24d9-3347-11f0-8318-1aebcda1d34f")   # Siber - alikaya
+            ]
+            
+            for lesson_teacher in lesson_teachers:
+                db.session.add(lesson_teacher)
+            db.session.commit()
+            print(f"Öğretmen-ders ilişkileri başarıyla kuruldu")
+            
+            # Yoklama oturumları ekle
+            attendance_sessions = [
+                Attenation(
+                    id=1,
+                    lesson_uuid='48db24d9-3347-11f0-8318-1aebcda1d44f', 
+                    teacher_uuid='36db24d9-3347-11f0-8318-1aebcda1d33f', 
+                    is_active=False,  # 0 değerine karşılık gelecek string value
+                    session_name='Yazılım Mühendisliği - 15 Mayıs Oturumu', 
+                    created_at=datetime.strptime('2025-05-15 09:00:00', '%Y-%m-%d %H:%M:%S'),
+                    closed_at=datetime.strptime('2025-05-15 11:30:00', '%Y-%m-%d %H:%M:%S')
+                ),
+                Attenation(
+                    id=2,
+                    lesson_uuid='49db24d9-3347-11f0-8318-1aebcda1d45f', 
+                    teacher_uuid='44db24d9-3347-11f0-8318-1aebcda1d34f', 
+                    is_active=False,
+                    session_name='Veritabanı Sistemleri - 16 Mayıs Oturumu', 
+                    created_at=datetime.strptime('2025-05-16 13:00:00', '%Y-%m-%d %H:%M:%S'),
+                    closed_at=datetime.strptime('2025-05-16 15:30:00', '%Y-%m-%d %H:%M:%S')
+                ),
+                Attenation(
+                    id=3,
+                    lesson_uuid='50db24d9-3347-11f0-8318-1aebcda1d46f', 
+                    teacher_uuid='45db24d9-3347-11f0-8318-1aebcda1d35f', 
+                    is_active=True,
+                    session_name='Yapay Zeka - 17 Mayıs Oturumu', 
+                    created_at=datetime.strptime('2025-05-17 10:00:00', '%Y-%m-%d %H:%M:%S'),
+                    closed_at=datetime.strptime('2025-05-17 12:30:00', '%Y-%m-%d %H:%M:%S')
+                ),
+                Attenation(
+                    id=4,
+                    lesson_uuid='51db24d9-3347-11f0-8318-1aebcda1d47f', 
+                    teacher_uuid='46db24d9-3347-11f0-8318-1aebcda1d36f', 
+                    is_active=True,  # 1 değerine karşılık gelecek string value
+                    session_name='Web Programlama - 18 Mayıs Oturumu', 
+                    created_at=datetime.strptime('2025-05-18 14:00:00', '%Y-%m-%d %H:%M:%S'),
+                    closed_at=None
+                ),
+                Attenation(
+                    id=5,
+                    lesson_uuid='52db24d9-3347-11f0-8318-1aebcda1d48f', 
+                    teacher_uuid='36db24d9-3347-11f0-8318-1aebcda1d33f', 
+                    is_active=True,
+                    session_name='Mobil Uygulama Geliştirme - 18 Mayıs Oturumu', 
+                    created_at=datetime.strptime('2025-05-18 16:00:00', '%Y-%m-%d %H:%M:%S'),
+                    closed_at=None
+                )
+            ]
+            
+            for attendance in attendance_sessions:
+                db.session.add(attendance)
+            db.session.commit()
+            print(f"5 yoklama oturumu başarıyla eklendi")
 
+            # Add attendance details for sessions
+            attendance_details = [
+                AttenationDetail(attenation_id=1, student_uuid='a1db24d9-3347-11f0-8318-1aebcda10001', card_id='CARD001', timestamp=datetime.strptime('2025-05-15 09:05:23', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=1, student_uuid='a2db24d9-3347-11f0-8318-1aebcda10002', card_id='CARD002', timestamp=datetime.strptime('2025-05-15 09:06:45', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=1, student_uuid='a3db24d9-3347-11f0-8318-1aebcda10003', card_id='CARD003', timestamp=datetime.strptime('2025-05-15 09:08:12', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=1, student_uuid='a4db24d9-3347-11f0-8318-1aebcda10004', card_id='CARD004', timestamp=datetime.strptime('2025-05-15 09:10:05', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=1, student_uuid='a5db24d9-3347-11f0-8318-1aebcda10005', card_id='CARD005', timestamp=datetime.strptime('2025-05-15 09:12:33', '%Y-%m-%d %H:%M:%S')),
+                
+                AttenationDetail(attenation_id=2, student_uuid='a2db24d9-3347-11f0-8318-1aebcda10002', card_id='CARD002', timestamp=datetime.strptime('2025-05-16 13:04:18', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=2, student_uuid='a3db24d9-3347-11f0-8318-1aebcda10003', card_id='CARD003', timestamp=datetime.strptime('2025-05-16 13:05:37', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=2, student_uuid='a6db24d9-3347-11f0-8318-1aebcda10006', card_id='CARD006', timestamp=datetime.strptime('2025-05-16 13:07:22', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=2, student_uuid='a7db24d9-3347-11f0-8318-1aebcda10007', card_id='CARD007', timestamp=datetime.strptime('2025-05-16 13:10:45', '%Y-%m-%d %H:%M:%S')),
+                AttenationDetail(attenation_id=2, student_uuid='a8db24d9-3347-11f0-8318-1aebcda10008', card_id='CARD008', timestamp=datetime.strptime('2025-05-16 13:12:19', '%Y-%m-%d %H:%M:%S')),
+            ]
+
+            for detail in attendance_details:
+                db.session.add(detail)
+            db.session.commit()
+            print(f"{len(attendance_details)} yoklama detayı başarıyla eklendi")
+            
+        except IntegrityError as e:
+            db.session.rollback()
+            print(f"Veri oluşturulurken hata: {str(e)}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Beklenmeyen hata: {str(e)}")
 # endregion
 
 if __name__ == '__main__':

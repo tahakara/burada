@@ -46,3 +46,43 @@ class UserModelMessages(ModelMessages):
     INVALID_USERNAME_OR_PASSWORD = "Invalid username or password."
 
     USER_LOGGED_IN_SUCCESSFULLY = "User logged in successfully."
+
+class LessonModelMessages:
+    LESSON_ALREADY_EXISTS = "A lesson with this name already exists."
+    LESSON_CREATED_SUCCESSFULLY = "Lesson created successfully."
+    ERROR_CREATING_LESSON = "An error occurred while creating the lesson."
+    LESSON_UPDATED_SUCCESSFULLY = "Lesson updated successfully."
+    ERROR_UPDATING_LESSON = "An error occurred while updating the lesson."
+    LESSON_DELETED_SUCCESSFULLY = "Lesson deleted successfully."
+    ERROR_DELETING_LESSON = "An error occurred while deleting the lesson."
+    LESSON_NAME_ALREADY_EXISTS = "Another lesson with this name already exists."
+
+class LessonTeacherModelMessages:
+    ASSIGNMENT_ALREADY_EXISTS = "This teacher is already assigned to this lesson."
+    ASSIGNMENT_CREATED_SUCCESSFULLY = "Teacher assigned to lesson successfully."
+    ERROR_CREATING_ASSIGNMENT = "An error occurred while assigning the teacher to the lesson."
+    ASSIGNMENT_DELETED_SUCCESSFULLY = "Assignment removed successfully."
+    ERROR_DELETING_ASSIGNMENT = "An error occurred while removing the assignment."
+
+class StudentModelMessages:
+    STUDENT_CREATED_SUCCESSFULLY = "Student created successfully."
+    ERROR_CREATING_STUDENT = "An error occurred while creating the student."
+    STUDENT_UPDATED_SUCCESSFULLY = "Student updated successfully."
+    ERROR_UPDATING_STUDENT = "An error occurred while updating the student."
+    STUDENT_DELETED_SUCCESSFULLY = "Student deleted successfully."
+    ERROR_DELETING_STUDENT = "An error occurred while deleting the student."
+
+class AttenationModelMessages:
+    ACTIVE_SESSION_EXISTS = "An active attendance session already exists for this lesson."
+    SESSION_CREATED_SUCCESSFULLY = "Attendance session created successfully."
+    ERROR_CREATING_SESSION = "An error occurred while creating the attendance session."
+    SESSION_CLOSED_SUCCESSFULLY = "Attendance session closed successfully."
+    SESSION_ALREADY_CLOSED = "This attendance session has already been closed."
+    ERROR_CLOSING_SESSION = "An error occurred while closing the attendance session."
+    NO_ACTIVE_SESSION = "No active attendance session found for this lesson."
+    NOT_AUTHORIZED_FOR_LESSON = "You are not authorized to start attendance for this lesson."
+
+class AttenationDetailModelMessages:
+    ALREADY_MARKED_PRESENT = "This student has already been marked present in this session."
+    ATTENDANCE_RECORDED_SUCCESSFULLY = "Attendance recorded successfully."
+    ERROR_RECORDING_ATTENDANCE = "An error occurred while recording attendance."

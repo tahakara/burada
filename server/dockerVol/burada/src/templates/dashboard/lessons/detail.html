@@ -1,0 +1,743 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Detay - Yoklama Sistemi</title>
+
+    {% include 'partials/scripts.html' %}
+    {% include 'partials/header-icons.html' %}
+    {% include 'partials/misc/css/css-local-links.html' %}
+
+    <!-- jQuery must come first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+     -->
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4>Öğretmen Paneli</h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-home me-2"></i>Ana Sayfa
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/dashboard/lessons">
+                                <i class="fas fa-book me-2"></i>Derslerim
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile">
+                                <i class="fas fa-user me-2"></i>Profil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ logout_path }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Çıkış
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div>
+                        <h1 class="h2" id="lesson-name">Ders Detayları</h1>
+                        <p class="text-muted" id="lesson-uuid"></p>
+                    </div>
+                    <div>
+                        <a href="/dashboard/lessons" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Derslerim
+                        </a>
+                        <a href="/dashboard/lessons/report/{{ lesson_uuid }}" class="btn btn-success">
+                            <i class="fas fa-chart-bar me-2"></i>Raporu Görüntüle
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" role="alert" id="attendance-status">
+                    <i class="fas fa-info-circle me-2"></i>Ders bilgileri yükleniyor...
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Ders Bilgileri</h5>
+                                <div id="lesson-info">
+                                    <p>Bilgiler yükleniyor...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Aktif Yoklama Bilgileri</h5>
+                                <div id="attendance-info">
+                                    <p>Bilgiler yükleniyor...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row" id="attendance-actions">
+                    <!-- JS ile doldurulacak -->
+                </div>
+                
+                <div class="row mt-4" id="attendance-sessions-container" style="display: none;">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Geçmiş Yoklama Oturumları</h5>
+                                <table id="sessions-table" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Oturum Adı</th>
+                                            <th>Başlangıç Tarihi</th>
+                                            <th>Bitiş Tarihi</th>
+                                            <th>Durum</th>
+                                            <th>Katılımcı Sayısı</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sessions-list">
+                                        <!-- JS ile doldurulacak -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4" id="active-session-students-container" style="display: none;">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Aktif Oturuma Katılan Öğrenciler</h5>
+                                <table id="students-table" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Adı</th>
+                                            <th>Soyadı</th>
+                                            <th>Öğrenci ID</th>
+                                            <th>Katılım Zamanı</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="students-list">
+                                        <!-- JS ile doldurulacak -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Yoklama Başlat Modal -->
+    <div class="modal fade" id="startAttendanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yoklama Başlat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bu ders için yoklama başlatmak istediğinize emin misiniz?</p>
+                    <div class="mb-3">
+                        <label for="session-name" class="form-label">Oturum Adı (Opsiyonel)</label>
+                        <input type="text" class="form-control" id="session-name" placeholder="Örn: Hafta 5 Yoklama">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" id="confirm-start-attendance">Yoklamayı Başlat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yoklama Kapat Modal -->
+    <div class="modal fade" id="stopAttendanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yoklama Kapat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Aktif yoklama oturumunu kapatmak istediğinize emin misiniz? Kapatıldıktan sonra öğrenciler artık yoklamaya katılamaz.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-danger" id="confirm-stop-attendance">Yoklamayı Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QR Kod Modal -->
+    <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yoklama QR Kodu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Öğrenciler bu QR kodu okutarak yoklamaya katılabilirler:</p>
+                    <div id="qrcode" class="mx-auto"></div>
+                    <p class="mt-2 text-muted">Yoklama URL'i:</p>
+                    <p id="attendance-url" class="font-monospace"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let lessonUuid;
+        let activeSession;
+        let refreshInterval;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL'den lesson_uuid parametresini al
+            const pathParts = window.location.pathname.split('/');
+            lessonUuid = pathParts[pathParts.length - 1];
+            
+            // UUID'yi görüntüle
+            document.getElementById('lesson-uuid').textContent = `UUID: ${lessonUuid}`;
+            
+            // Ders detaylarını yükle
+            loadLessonDetails();
+            
+            // Event Listeners
+            document.getElementById('confirm-start-attendance').addEventListener('click', startAttendance);
+            document.getElementById('confirm-stop-attendance').addEventListener('click', stopAttendance);
+        });
+        
+        function loadLessonDetails() {
+            // Ders detaylarını API'den al
+            fetch(`/api/dashboard/lessons/detail/${lessonUuid}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayLessonDetails(data.data);
+                        
+                        // Aktif oturum varsa, düzenli olarak öğrenci listesini güncelle
+                        if (data.data.active_session) {
+                            refreshInterval = setInterval(loadActiveSessionStudents, 5000);
+                        }
+                    } else {
+                        showError("Ders detayları yüklenirken bir hata oluştu: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    showError("Sunucu hatası: " + error);
+                });
+        }
+        
+        function displayLessonDetails(lesson) {
+            // Ders adını görüntüle
+            document.getElementById('lesson-name').textContent = lesson.name;
+            
+            // Ders bilgilerini görüntüle
+            let lessonInfoHtml = `
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 30%">Ders Adı:</th>
+                        <td>${lesson.lesson_name}</td>
+                    </tr>
+                    <tr>
+                        <th>Ders UUID:</th>
+                        <td><code>${lesson.lesson_uuid}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Toplam Yoklama Sayısı:</th>
+                        <td>${lesson.total_sessions}</td>
+                    </tr>
+                    <tr>
+                        <th>Toplam Öğrenci Sayısı:</th>
+                        <td>${lesson.total_students}</td>
+                    </tr>
+                </table>
+            `;
+            document.getElementById('lesson-info').innerHTML = lessonInfoHtml;
+            
+            // Aktif yoklama durumunu görüntüle
+            const attendanceStatusEl = document.getElementById('attendance-status');
+            if (lesson.active_session) {
+                activeSession = lesson.active_session;
+                attendanceStatusEl.classList.remove('alert-info');
+                attendanceStatusEl.classList.add('alert-success');
+                attendanceStatusEl.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Aktif Yoklama Var!</strong> "${lesson.lesson_name}" dersi için aktif bir yoklama oturumu bulunuyor.
+                `;
+                
+                // Aktif yoklama bilgilerini görüntüle
+                let activeAttendanceHtml = `
+                    <table class="table table-sm">
+                        <tr>
+                            <th style="width: 30%">Oturum ID:</th>
+                            <td>${activeSession.id}</td>
+                        </tr>
+                        <tr>
+                            <th>Oturum Adı:</th>
+                            <td>${activeSession.session_name || 'Belirtilmemiş'}</td>
+                        </tr>
+                        <tr>
+                            <th>Başlangıç Zamanı:</th>
+                            <td>${activeSession.created_at}</td>
+                        </tr>
+                        <tr>
+                            <th>Katılan Öğrenci Sayısı:</th>
+                            <td id="student-count">${activeSession.student_count}</td>
+                        </tr>
+                    </table>
+                `;
+                document.getElementById('attendance-info').innerHTML = activeAttendanceHtml;
+                
+                // Yoklama aksiyonlarını görüntüle
+                let actionsHtml = `
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Yoklama Kapat</h5>
+                                <p class="card-text">Aktif yoklama oturumunu kapatın.</p>
+                                <button class="btn btn-danger" onclick="prepareStopAttendance()">
+                                    <i class="fas fa-stop me-2"></i>Yoklamayı Kapat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">QR Kod</h5>
+                                <p class="card-text">Öğrenciler için QR kod oluşturun.</p>
+                                <button class="btn btn-info" onclick="generateQRCode()">
+                                    <i class="fas fa-qrcode me-2"></i>QR Kod Görüntüle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Katılan Öğrenciler</h5>
+                                <p class="card-text">Oturuma katılan öğrencileri görüntüleyin.</p>
+                                <button class="btn btn-primary" onclick="loadActiveSessionStudents(true)">
+                                    <i class="fas fa-users me-2"></i>Öğrencileri Görüntüle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('attendance-actions').innerHTML = actionsHtml;
+                
+                // Aktif oturum için öğrencileri yükle
+                loadActiveSessionStudents();
+            } else {
+                attendanceStatusEl.classList.remove('alert-info');
+                attendanceStatusEl.classList.add('alert-warning');
+                attendanceStatusEl.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Aktif Yoklama Yok!</strong> "${lesson.lesson_name}" dersi için aktif bir yoklama oturumu bulunmuyor.
+                `;
+                
+                // Yoklama bilgilerini görüntüle
+                document.getElementById('attendance-info').innerHTML = `
+                    <p>Aktif bir yoklama oturumu bulunmuyor. Yeni bir yoklama başlatabilirsiniz.</p>
+                `;
+                
+                // Yoklama aksiyonlarını görüntüle
+                document.getElementById('attendance-actions').innerHTML = `
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Yoklama Başlat</h5>
+                                <p class="card-text">"${lesson.lesson_name}" dersi için yeni bir yoklama oturumu başlatın.</p>
+                                <button class="btn btn-primary" onclick="prepareStartAttendance()">
+                                    <i class="fas fa-play me-2"></i>Yoklama Başlat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Geçmiş oturumları görüntüle
+            if (lesson.sessions && lesson.sessions.length > 0) {
+                displayAttendanceSessions(lesson.sessions);
+            }
+        }
+        
+        function loadActiveSessionStudents(showContainer = false) {
+            if (!activeSession) return;
+            
+            fetch(`/api/dashboard/attendance/students/${activeSession.id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayActiveSessionStudents(data.data, showContainer);
+                    } else {
+                        showError("Öğrenci listesi yüklenirken bir hata oluştu: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    showError("Sunucu hatası: " + error);
+                });
+        }
+        
+        // function displayActiveSessionStudents(students, showContainer) {
+        //     // Öğrenci sayısını güncelle
+        //     document.getElementById('student-count').textContent = students.length;
+            
+        //     // Tabloyu güncelle
+        //     const studentsList = document.getElementById('students-list');
+            
+        //     if (students.length === 0) {
+        //         studentsList.innerHTML = '<tr><td colspan="4" class="text-center">Henüz katılan öğrenci bulunmuyor.</td></tr>';
+        //     } else {
+        //         let html = '';
+        //         students.forEach(student => {
+        //             html += `
+        //                 <tr>
+        //                     <td>${student.name}</td>
+        //                     <td>${student.surname}</td>
+        //                     <td><code>${student.student_uuid}</code></td>
+        //                     <td>${student.timestamp}</td>
+        //                 </tr>
+        //             `;
+        //         });
+        //         studentsList.innerHTML = html;
+        //     }
+            
+        //     // Container'ı göster/gizle
+        //     const container = document.getElementById('active-session-students-container');
+        //     if (showContainer) {
+        //         container.style.display = 'block';
+                
+        //         // DataTables'ı aktifleştir
+        //         $('#students-table').DataTable({
+        //             destroy: true,
+        //             language: {
+        //                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+        //             }
+        //         });
+        //     }
+        // }
+
+                function displayActiveSessionStudents(students, showContainer) {
+            // Öğrenci sayısını güncelle
+            document.getElementById('student-count').textContent = students.length;
+            
+            // Tabloyu güncelle
+            const studentsList = document.getElementById('students-list');
+            
+            if (students.length === 0) {
+                studentsList.innerHTML = '<tr><td colspan="4" class="text-center">Henüz katılan öğrenci bulunmuyor.</td></tr>';
+            } else {
+                let html = ''; // Initialize the html variable
+                students.forEach(student => {
+                    html += `
+                        <tr>
+                            <td>${student.name || ''}</td>
+                            <td>${student.surname || ''}</td>
+                            <td><code>${student.student_uuid || ''}</code></td>
+                            <td>${student.timestamp || ''}</td>
+                        </tr>
+                    `;
+                });
+                studentsList.innerHTML = html;
+            }
+            
+            // Container'ı göster/gizle
+            const container = document.getElementById('active-session-students-container');
+            if (showContainer) {
+                container.style.display = 'block';
+                
+                // Wait for DOM to be updated before initializing DataTables
+                setTimeout(() => {
+                    try {
+                        // First destroy any existing DataTable
+                        if ($.fn.DataTable.isDataTable('#students-table')) {
+                            $('#students-table').DataTable().destroy();
+                        }
+                        
+                        // Then reinitialize with proper settings
+                        $('#students-table').DataTable({
+                            language: {
+                                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+                            },
+                            responsive: true,
+                            ordering: true,
+                            paging: true
+                        });
+                    } catch (error) {
+                        console.error("DataTables error:", error);
+                    }
+                }, 100);
+            }
+        }
+        
+        // function displayAttendanceSessions(sessions) {
+        //     const sessionsList = document.getElementById('sessions-list');
+            
+        //     let html = '';
+        //     sessions.forEach(session => {
+        //         html += `
+        //             <tr>
+        //                 <td>${session.id}</td>
+        //                 <td>${session.session_name || 'Belirtilmemiş'}</td>
+        //                 <td>${session.created_at}</td>
+        //                 <td>${session.closed_at || 'Açık'}</td>
+        //                 <td>
+        //                     ${session.status == true ? 
+        //                     '<span class="badge bg-success">Aktif</span>':   
+        //                     '<span class="badge bg-secondary">Kapalı</span>'}
+        //                 </td>
+        //                 <td>${session.student_count}</td>
+        //                 <td>
+        //                     <button class="btn btn-sm btn-info" onclick="viewSessionDetails(${session.id})">
+        //                         <i class="fas fa-eye me-1"></i>Detay
+        //                     </button>
+        //                 </td>
+        //             </tr>
+        //         `;
+        //     });
+            
+        //     sessionsList.innerHTML = html;
+        //     document.getElementById('attendance-sessions-container').style.display = 'block';
+            
+        //     // DataTables'ı aktifleştir
+        //     $('#sessions-table').DataTable({
+        //         language: {
+        //             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+        //         }
+        //     });
+        // }
+
+                function displayAttendanceSessions(sessions) {
+            const sessionsList = document.getElementById('sessions-list');
+            
+            let html = '';
+            sessions.forEach(session => {
+                html += `
+                    <tr>
+                        <td>${session.id}</td>
+                        <td>${session.session_name || 'Belirtilmemiş'}</td>
+                        <td>${session.created_at}</td>
+                        <td>${session.closed_at || 'Açık'}</td>
+                        <td>
+                            ${session.status == true ? 
+                            '<span class="badge bg-success">Aktif</span>':   
+                            '<span class="badge bg-secondary">Kapalı</span>'}
+                        </td>
+                        <td>${session.student_count}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewSessionDetails(${session.id})">
+                                <i class="fas fa-eye me-1"></i>Detay
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            sessionsList.innerHTML = html;
+            document.getElementById('attendance-sessions-container').style.display = 'block';
+            
+            // Wait for DOM to be updated before initializing DataTables
+            setTimeout(() => {
+                try {
+                    // First destroy any existing DataTable
+                    if ($.fn.DataTable.isDataTable('#sessions-table')) {
+                        $('#sessions-table').DataTable().destroy();
+                    }
+                    
+                    // Then reinitialize with proper settings
+                    $('#sessions-table').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+                        },
+                        responsive: true
+                    });
+                } catch (error) {
+                    console.error("DataTables error:", error);
+                }
+            }, 100);
+        }
+        
+        function prepareStartAttendance() {
+            const modal = new bootstrap.Modal(document.getElementById('startAttendanceModal'));
+            modal.show();
+        }
+        
+        function startAttendance() {
+            const sessionName = document.getElementById('session-name').value;
+            
+            fetch('/api/dashboard/attendance/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    lesson_uuid: lessonUuid,
+                    session_name: sessionName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Başarılı yoklama başlatma
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('startAttendanceModal'));
+                    modal.hide();
+                    
+                    // Sayfayı yenile
+                    showSuccess("Yoklama başarıyla başlatıldı.");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showError("Yoklama başlatılırken bir hata oluştu: " + data.message);
+                }
+            })
+            .catch(error => {
+                showError("Sunucu hatası: " + error);
+            });
+        }
+        
+        function prepareStopAttendance() {
+            const modal = new bootstrap.Modal(document.getElementById('stopAttendanceModal'));
+            modal.show();
+        }
+        
+        function stopAttendance() {
+            fetch(`/api/dashboard/attendance/close/${activeSession.id}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Başarılı yoklama kapatma
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('stopAttendanceModal'));
+                    modal.hide();
+                    
+                    // Sayfayı yenile
+                    showSuccess("Yoklama başarıyla kapatıldı.");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showError("Yoklama kapatılırken bir hata oluştu: " + data.message);
+                }
+            })
+            .catch(error => {
+                showError("Sunucu hatası: " + error);
+            });
+        }
+        
+        function generateQRCode() {
+            if (!activeSession) return;
+            
+            const attendanceUrl = `${window.location.origin}/attendance/${lessonUuid}`;
+            
+            document.getElementById('attendance-url').textContent = attendanceUrl;
+            
+            // QR kodu oluştur
+            const qrcode = document.getElementById('qrcode');
+            qrcode.innerHTML = ''; // Önceki QR kodu temizle
+            
+            QRCode.toCanvas(qrcode, attendanceUrl, {
+                width: 250,
+                margin: 2,
+                color: {
+                    dark: '#000',
+                    light: '#FFF'
+                }
+            }, function(error) {
+                if (error) console.error(error);
+            });
+            
+            // QR kod modalını göster
+            const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+            modal.show();
+        }
+        
+        function viewSessionDetails(sessionId) {
+            // Bu fonksiyon, belirli bir oturumun detaylarını gösterir
+            // Örnek olarak, öğrencileri listeleyen bir modal açabilirsiniz
+            alert(`Oturum ID: ${sessionId} için detaylar gösterilecek`);
+        }
+        
+        function showError(message) {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            document.querySelector('main').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // 5 saniye sonra otomatik kapat
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-danger');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            document.querySelector('main').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // 3 saniye sonra otomatik kapat
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
