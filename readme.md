@@ -134,7 +134,7 @@ CREATE DATABASE burada;
 
 ## 👨‍💻 Contribute
 
-We welcome contributions! For feature suggestions, bug reports, and pull requests, please use the [Issues](https://github.com/tahakara/burada/issues) or [Pull Requests](https://github.com/tahakara/Page/pulls) sections.
+We welcome contributions! For feature suggestions, bug reports, and pull requests, please use the [Issues](https://github.com/tahakara/burada/issues) or [Pull Requests](https://github.com/tahakara/burada/pulls) sections.
 
 ## 📄 License
 

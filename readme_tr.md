@@ -142,7 +142,7 @@ CREATE DATABASE burada;
 
 ## 👨‍💻 Katkıda Bulun
 
-Katkılarınızı memnuniyetle karşılıyoruz! Yeni özellik önerileri, bug bildirimleri ve pull request'ler için lütfen [Issues](https://github.com/tahakara/burada/issues) veya [Pull Requests](https://github.com/tahakara/Page/pulls) bölümlerini kullanın.
+Katkılarınızı memnuniyetle karşılıyoruz! Yeni özellik önerileri, bug bildirimleri ve pull request'ler için lütfen [Issues](https://github.com/tahakara/burada/issues) veya [Pull Requests](https://github.com/tahakara/burada/pulls) bölümlerini kullanın.
 
 
 
