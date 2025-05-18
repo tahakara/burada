@@ -4,8 +4,20 @@
 This project is an attendance system composed of hardware and software components that allows teachers and students to perform attendance using RFID cards.
 
 <a href="./misc/images/master.jpg">
-<img title="Project Image" alt="Project Image (super light)" style="width:50vw" src="./misc/images/master_superlight.jpg">
+<img title="Project Image" alt="Project Image (super light)" style="display: block; margin: auto; width: 50vw;" src="./misc/images/master_superlight.jpg">
 </a>
+
+<table>
+  <tr>
+      <img title="Dashboard" alt="Dashboard" src="./misc/images/dashboard/burada_dashboard.png" width="49%" style="margin-right: 1px">
+      <img title="Lessons" alt="Lessons" src="./misc/images/dashboard/burada_dashboard_lessons.png" width="49%" style="margin-right: 1px">
+  </tr>
+  <tr>
+      <img title="Detail Off" alt="Detail Off" src="./misc/images/dashboard/burada_dashboard_lessons_detail_off.png" width="49%" style="margin-right: 1px">
+      <img title="Detail On" alt="Detail On" src="./misc/images/dashboard/burada_dashboard_lessons_detail_on.png" width="49%">
+
+  </tr>
+</table>
 
 ## 🧩 Project Components
 
