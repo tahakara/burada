@@ -116,13 +116,13 @@ Static files are routed under `/frontend` via Traefik.
 
 ### MySQL
 
-You can create the database structure using the SQL file below:
+You only need to create the database in MySQL. The Flask application will automatically create the required tables when it starts.
 
 ```sql
-CREATE TABLE users (...);
-CREATE TABLE devices (...);
-CREATE TABLE attendance (...);
+CREATE DATABASE burada;
 ```
+
+> **Note:** If you encounter a table creation error when starting the application, delete all tables in the database and restart the Flask application.
 
 ## 📈 Development Potential
 

@@ -118,13 +118,13 @@ Statik dosyalar Traefik altında `/frontend` yoluna yönlendirilir.
 
 ### MySQL
 
-Veritabanı yapısını aşağıdaki SQL dosyasından kurabilirsiniz:
+MySQL üzerinde yalnızca veritabanını oluşturmanız yeterlidir. Flask uygulaması başlatıldığında gerekli tabloları otomatik olarak oluşturacaktır.
 
 ```sql
-CREATE TABLE users (...);
-CREATE TABLE devices (...);
-CREATE TABLE attendance (...);
+CREATE DATABASE burada;
 ```
+
+> **Uyarı:** Eğer uygulama başlatılırken tablo oluşturma hatası alırsanız, ilgili veritabanındaki tüm tabloları silip Flask uygulamasını tekrar başlatın.
 
 ---
 
