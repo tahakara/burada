@@ -8,13 +8,20 @@ Bu proje, öğretmenlerin ve öğrencilerin RFID kartları kullanarak yoklama i�
 
 <table>
   <tr>
-      <img title="Dashboard" alt="Dashboard" src="./misc/images/dashboard/burada_dashboard.png" width="49%" style="margin-right: 1px">
-      <img title="Lessons" alt="Lessons" src="./misc/images/dashboard/burada_dashboard_lessons.png" width="49%" style="margin-right: 1px">
+    <td>
+      <img title="Dashboard" alt="Dashboard" src="./misc/images/dashboard/burada_dashboard.png" width="" style="margin-right: 1px">
+    </td>
+    <td>
+      <img title="Lessons" alt="Lessons" src="./misc/images/dashboard/burada_dashboard_lessons.png" width="" style="margin-right: 1px">
+    </td>
   </tr>
   <tr>
-      <img title="Detail Off" alt="Detail Off" src="./misc/images/dashboard/burada_dashboard_lessons_detail_off.png" width="49%" style="margin-right: 1px">
-      <img title="Detail On" alt="Detail On" src="./misc/images/dashboard/burada_dashboard_lessons_detail_on.png" width="49%">
-
+    <td>
+      <img title="Detail Off" alt="Detail Off" src="./misc/images/dashboard/burada_dashboard_lessons_detail_off.png" width="" style="margin-right: 1px">
+    </td>
+    <td>
+      <img title="Detail On" alt="Detail On" src="./misc/images/dashboard/burada_dashboard_lessons_detail_on.png" width="">
+    </td>
   </tr>
 </table>
 
