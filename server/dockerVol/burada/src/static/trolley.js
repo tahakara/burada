@@ -11,12 +11,12 @@ let beat = {
 };
 
 let ipInfo = {ipfy: null, ipme: null};
-const dust = {
-    host: 'dust.tahakara.dev',
+const burada = {
+    host: 'burada.tahakara.dev',
     ip: '/ip',
     beat: '/beat',
     device: '/device',
-    hostUri: `https://dust.tahakara.dev`
+    hostUri: `https://burada.tahakara.dev`
 };
 
 let deviceInfo = null;
@@ -65,7 +65,7 @@ async function getIpAddress() {
     }
 
     try {
-        const ipmeResponse = await fetch(`${dust.hostUri}${dust.ip}?t=${getUnixTime()}&r=${window.location.href}`, {
+        const ipmeResponse = await fetch(`${burada.hostUri}${burada.ip}?t=${getUnixTime()}&r=${window.location.href}`, {
             credentials: 'include',
             referrerPolicy: 'strict-origin-when-cross-origin',
             referrer: window.location.href || document.referrer
@@ -88,7 +88,7 @@ function heartbeat(s = 5000) {
     setInterval(async () => {
         let t = getUnixTime();
         try {
-            const response = await fetch(`${dust.hostUri}${dust.beat}?t=${t}&r=${window.location.href}`, {
+            const response = await fetch(`${burada.hostUri}${burada.beat}?t=${t}&r=${window.location.href}`, {
                 credentials: 'include',
                 referrerPolicy: 'strict-origin-when-cross-origin',
                 referrer: window.location.href || document.referrer
@@ -177,7 +177,7 @@ async function sentDeviceInfo() {
     };
     console.log('Sending Device Info => ', data);
     try {
-        const response = await fetch(`${dust.hostUri}${dust.device}?r=${data.r}`, {
+        const response = await fetch(`${burada.hostUri}${burada.device}?r=${data.r}`, {
             method: 'POST',
             referrerPolicy: 'strict-origin-when-cross-origin',
             referrer: window.location.href || document.referrer,
