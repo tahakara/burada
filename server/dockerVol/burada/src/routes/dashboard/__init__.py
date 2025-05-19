@@ -16,10 +16,15 @@ def dash_index():
 
 @dash_bp.route("/lessons")
 @auth_middleware.login_required
-def lessons():
+def dash_lessons():
     return render_template("dashboard/lessons/index.html", logout_path=urlparse(url_for("auth.logout_get")).path)
 
 @dash_bp.route("/lessons/detail/<lesson_uuid>")
 @auth_middleware.login_required
-def lessons_detail(lesson_uuid):
+def dash_lessons_detail(lesson_uuid):
     return render_template("dashboard/lessons/detail.html", lesson_uuid=lesson_uuid, logout_path=urlparse(url_for("auth.logout_get")).path)
+
+@dash_bp.route("/lessons/report/<lesson_uuid>")
+@auth_middleware.login_required
+def lesson_report_page(lesson_uuid):
+    return render_template("dashboard/lessons/report.html", lesson_uuid=lesson_uuid)

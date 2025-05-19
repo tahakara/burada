@@ -31,3 +31,8 @@ def beat():
 def trolley():
     """Sending javascript file from static folder"""
     return make_response(send_from_directory(current_app.static_folder, 'js/trolley/alpha-1/trolley-compact.js'), 200, {'Content-Type': 'application/javascript'})
+
+@dust_bp.route('/device', methods=ALL_METHODS)
+def device():
+    """Endpoint to get device information."""
+    return make_response(jsonify({'device': 'ok'}), 200, {'Content-Type': 'application/json'}) 

@@ -230,6 +230,7 @@ void postToServer(String id24, String id25, String id26) {
   doc["id24"] = id24;
   doc["id25"] = id25;
   doc["id26"] = id26;
+  doc["lesson_uuid"] = "lesson_uuid"; // lesson_uuid'yu buraya ekleyin
   serializeJson(doc, jsonBody);
 
   // İstek başlığı ve body
